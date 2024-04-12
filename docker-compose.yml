@@ -1,0 +1,9 @@
+services:
+  fastapi_app:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      MY_ENV_VARIABLE: "value1"
+      ANOTHER_VARIABLE: "value2"
+    restart: always
