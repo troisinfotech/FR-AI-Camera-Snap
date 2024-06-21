@@ -14,8 +14,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class CameraLink(BaseModel):
     link: str
+
 
 @app.post("/process_camera_link")
 async def process_camera_link(camera_link: CameraLink):
@@ -26,16 +28,22 @@ async def process_camera_link(camera_link: CameraLink):
     ret, frame = cap.read()
     if not ret:
         raise HTTPException(status_code=500, detail="Error reading frame from camera stream")
-    
+
+    # Get the original resolution before resizing
+    original_resolution = (frame.shape[1], frame.shape[0])
+
     # Resize the frame to 720p
-    frame = cv2.resize(frame, (1280, 720))  # Assuming 1280x720 is 720p
-    
-    cv2.imwrite("captured_image.jpg", frame)
+    frame_resized = cv2.resize(frame, (1280, 720))  # Assuming 1280x720 is 720p
+
+    cv2.imwrite("captured_image.jpg", frame_resized)
     cap.release()
     with open("captured_image.jpg", "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-    return encoded_image
+    return {"encoded_image": encoded_image, "original_camera_resolution": original_resolution}
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=9000)
+    uvicorn.run(app, host="localhost", port=8000)
+    allow_methods=["POST"],
+    allow_headers=["*"],
